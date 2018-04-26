@@ -1,5 +1,6 @@
 package com.example.mohamed.bakingapp.widget;
 
+import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
 import android.content.Context;
@@ -11,6 +12,8 @@ import android.widget.RemoteViews;
 
 import com.example.mohamed.bakingapp.MainActivity;
 import com.example.mohamed.bakingapp.R;
+import com.example.mohamed.bakingapp.RecipeDetailsActivity;
+import com.example.mohamed.bakingapp.utilies.JsonUtilise;
 
 /**
  * Implementation of App Widget functionality.
@@ -20,9 +23,19 @@ public class FavoriteRecipeWidgetProvider extends AppWidgetProvider {
     static void updateAppWidget(Context context, AppWidgetManager appWidgetManager,
                                 int appWidgetId) {
         RemoteViews views;
-        if (isIngredientChoosed(context))
-        views = getIngredientListRemoteView(context);
+        if (isIngredientChoosed(context)) {
+            views = getIngredientListRemoteView(context);
 
+            String json=context.getSharedPreferences(MainActivity.KEY_SHARED_PREF,Context.MODE_PRIVATE).getString(MainActivity.KEY_JSON,"");
+            int recipId=context.getSharedPreferences(MainActivity.KEY_SHARED_PREF,Context.MODE_PRIVATE).getInt(MainActivity.KEY_RECIPID,0);
+            String recipName= JsonUtilise.getRecips(json,recipId).getName();
+            views.setTextViewText(R.id.tv_recip_name,recipName);
+            Intent intent = new Intent(context, RecipeDetailsActivity.class);
+            intent.putExtra(MainActivity.KEY_JSON,json);
+            intent.putExtra(MainActivity.KEY_RECIPID,recipId);
+            PendingIntent mainPendingIntent = PendingIntent.getActivity(context, 0, intent, 0);
+            views.setOnClickPendingIntent(R.id.tv_recip_name, mainPendingIntent);
+        }
         else views=new RemoteViews(context.getPackageName(),R.layout.widget_empty_view);
 
         appWidgetManager.updateAppWidget(appWidgetId, views);

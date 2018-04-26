@@ -31,6 +31,7 @@ public class OneStepFragment extends Fragment implements View.OnClickListener{
     @BindView(R.id.tv_shortdescription)TextView mShortDesc;
     @BindView(R.id.tv_longdescription)TextView mLongDesc;
     @BindView(R.id.img_showvideo)ImageView mShowVideo;
+    @BindView(R.id.img_click_to_play)ImageView mClickToPlay;
     String shortDesc;
     String longDesc;
     String videoUrl;
@@ -39,6 +40,8 @@ public class OneStepFragment extends Fragment implements View.OnClickListener{
     private String KEY_LONGDESC="long_desc";
     private String KEY_VIDEOURL="videourl";
     private String KEY_IMGLINK="imagelink";
+
+
 
     public OneStepFragment() {
     }
@@ -59,7 +62,15 @@ public class OneStepFragment extends Fragment implements View.OnClickListener{
         }
         mLongDesc.setText(longDesc);
         mShortDesc.setText(shortDesc);
-        Picasso.get().load(imageLink).into(mShowVideo);
+        if (!imageLink.isEmpty())
+        Picasso.get().load(imageLink).placeholder(R.drawable.recipe_error_placeholder).error(R.drawable.recipe_error_placeholder).into(mShowVideo);
+        else
+            mShowVideo.setImageResource(R.drawable.recipe_error_placeholder);
+
+        if (videoUrl.isEmpty())
+            mClickToPlay.setVisibility(View.GONE);
+
+
         view.setOnClickListener(this);
 
         return view;

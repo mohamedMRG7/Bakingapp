@@ -24,7 +24,16 @@ public class RecipeData implements Parcelable {
     private String shortDescrption;
     private String decription;
     private String videoUrl;
+    private String thumbNailUrl;
 
+
+    public String getThumbNailUrl() {
+        return thumbNailUrl;
+    }
+
+    public void setThumbNailUrl(String thumbNailUrl) {
+        this.thumbNailUrl = thumbNailUrl;
+    }
 
     public String getName() {
         return name;
@@ -98,6 +107,9 @@ public class RecipeData implements Parcelable {
         this.videoUrl = videoUrl;
     }
 
+    public RecipeData() {
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -114,9 +126,7 @@ public class RecipeData implements Parcelable {
         dest.writeString(this.shortDescrption);
         dest.writeString(this.decription);
         dest.writeString(this.videoUrl);
-    }
-
-    public RecipeData() {
+        dest.writeString(this.thumbNailUrl);
     }
 
     protected RecipeData(Parcel in) {
@@ -129,9 +139,10 @@ public class RecipeData implements Parcelable {
         this.shortDescrption = in.readString();
         this.decription = in.readString();
         this.videoUrl = in.readString();
+        this.thumbNailUrl = in.readString();
     }
 
-    public static final Parcelable.Creator<RecipeData> CREATOR = new Parcelable.Creator<RecipeData>() {
+    public static final Creator<RecipeData> CREATOR = new Creator<RecipeData>() {
         @Override
         public RecipeData createFromParcel(Parcel source) {
             return new RecipeData(source);

@@ -24,7 +24,7 @@ public class JsonUtilise {
     private static final String DECRIPTION="description";
     private static final String VIDEO_URL="videoURL";
 
-    private static final String SERVINGS="servings";
+    private static final String THUMBNAIL_URL="thumbnailURL";
 
 
 
@@ -66,12 +66,12 @@ public class JsonUtilise {
             String shortDescription=steps.optJSONObject(stepId).optString(SHORT_DECRIPTION);
             String description=steps.optJSONObject(stepId).optString(DECRIPTION);
             String videoUrl=steps.optJSONObject(stepId).optString(VIDEO_URL);
-            String image=recipes.optJSONObject(recipeId).optString(BAKING_IMAGE);
+            String thumbNailUrl=steps.optJSONObject(stepId).optString(THUMBNAIL_URL);
             RecipeData data=new RecipeData();
             data.setShortDescrption(shortDescription);
             data.setDecription(description);
             data.setVideoUrl(videoUrl);
-            data.setImage(image);
+            data.setThumbNailUrl(thumbNailUrl);
 
             return data;
 

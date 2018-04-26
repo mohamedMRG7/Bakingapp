@@ -69,8 +69,9 @@ public class StepsAdapter extends RecyclerView.Adapter<StepsAdapter.StepsAdapter
         return new StepsAdapterViewHolder(view);
     }
 
+
     @Override
-    public void onBindViewHolder(StepsAdapterViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull StepsAdapterViewHolder holder, int position) {
 
         RecipeData data = JsonUtilise.getSteps(json,recipeId,position);
 
@@ -78,10 +79,14 @@ public class StepsAdapter extends RecyclerView.Adapter<StepsAdapter.StepsAdapter
             holder.mLongDesc.setText(data.getDecription());
             holder.mShortDesc.setText(data.getShortDescrption());
 
-            if (data.getImage() != null && !data.getImage().isEmpty())
-                Picasso.get().load(data.getImage()).into(holder.mShowVideo);
+            if (!data.getVideoUrl().isEmpty()) {
+                holder.mClickToPlay.setVisibility(View.VISIBLE);
+            }
+
+            if (!data.getThumbNailUrl().isEmpty())
+                Picasso.get().load(data.getThumbNailUrl()).placeholder(R.drawable.recipe_error_placeholder).error(R.drawable.recipe_error_placeholder).into(holder.mShowVideo);
             else
-                Picasso.get().load(recipeImages[recipeId]).into(holder.mShowVideo);
+                holder.mShowVideo.setImageResource(R.drawable.recipe_error_placeholder);
         }
         else
             {
@@ -102,6 +107,7 @@ public class StepsAdapter extends RecyclerView.Adapter<StepsAdapter.StepsAdapter
         @BindView(R.id.tv_longdescription)TextView mLongDesc;
         @BindView(R.id.img_showvideo)ImageView mShowVideo;
         @BindView(R.id.playicon_layout)FrameLayout mPlayIcon;
+        @BindView(R.id.img_click_to_play)ImageView mClickToPlay;
 
         public StepsAdapterViewHolder(View itemView) {
             super(itemView);
@@ -131,8 +137,10 @@ public class StepsAdapter extends RecyclerView.Adapter<StepsAdapter.StepsAdapter
             else
                 {
 
+
+
                         OneStepFragment oneStepFragment = new OneStepFragment();
-                        oneStepFragment.setFragmentData(data.getShortDescrption(), data.getDecription(), data.getVideoUrl(), recipeImages[recipeId]);
+                        oneStepFragment.setFragmentData(data.getShortDescrption(), data.getDecription(), data.getVideoUrl(),data.getThumbNailUrl());
                         fm.beginTransaction().replace(R.id.details_container, oneStepFragment).commit();
 
 

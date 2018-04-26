@@ -1,8 +1,10 @@
 package com.example.mohamed.bakingapp;
 
 import android.net.Uri;
+import android.os.PersistableBundle;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 
 import com.google.android.exoplayer2.ExoPlayerFactory;
@@ -28,6 +30,11 @@ public class PlayVideoActivity extends AppCompatActivity {
     @BindView(R.id.exo_playvideo)SimpleExoPlayerView mExoPlayerView;
     SimpleExoPlayer mExoPlayer;
     String uri;
+    long playerPosition=0;
+    private final String KEY_EXOPLAYER_POSITION="exoposition";
+    private final String KEY_ISPLAYING="isplaying";
+    private boolean isPlaying=true;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -37,6 +44,12 @@ public class PlayVideoActivity extends AppCompatActivity {
 
 
         ButterKnife.bind(this);
+
+        if (savedInstanceState!=null)
+        {
+             playerPosition=savedInstanceState.getLong(KEY_EXOPLAYER_POSITION);
+             isPlaying=savedInstanceState.getBoolean(KEY_ISPLAYING);
+        }
 
     }
 
@@ -66,14 +79,24 @@ public class PlayVideoActivity extends AppCompatActivity {
             MediaSource mediaSource = new ExtractorMediaSource(uri,
                     new DefaultDataSourceFactory(this,Util.getUserAgent(this,"BakingApp")), extractorsFactory, null, null);
 
+            mExoPlayer.seekTo(playerPosition);
 
             mExoPlayer.prepare(mediaSource);
-            mExoPlayer.setPlayWhenReady(true);
+            mExoPlayer.setPlayWhenReady(isPlaying);
 
         }
 
     }
 
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+            outState.putLong(KEY_EXOPLAYER_POSITION,playerPosition);
+            outState.putBoolean(KEY_ISPLAYING,isPlaying);
+
+    }
 
     @Override
     public void onStart() {
@@ -97,6 +120,9 @@ public class PlayVideoActivity extends AppCompatActivity {
     private void releasePlayer()
     {
         if (mExoPlayer!=null) {
+            playerPosition=mExoPlayer.getCurrentPosition();
+            isPlaying=mExoPlayer.getPlayWhenReady();
+
             mExoPlayer.stop();
             mExoPlayer.release();
             mExoPlayer = null;
