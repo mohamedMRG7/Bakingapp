@@ -73,7 +73,20 @@ public class RecipeDetailsActivity extends AppCompatActivity implements View.OnC
         if (getSupportFragmentManager().findFragmentByTag("steps")==null)
             getSupportFragmentManager().beginTransaction().add(R.id.steps_container, stepsFragment,"steps").commit();
 
+        if (mShowIngredients!=null)
         mShowIngredients.setOnClickListener(this);
+
+
+        if (findViewById(R.id.ingredients_container)!=null)
+        {
+            IngridentsFragment ingridentsFragment=new IngridentsFragment();
+            ingridentsFragment.setFragmentData(json,recipId);
+
+            if (getSupportFragmentManager().findFragmentByTag("ingredients")==null)
+                getSupportFragmentManager().beginTransaction().add(R.id.ingredients_container, ingridentsFragment,"ingredients").commit();
+
+        }
+
     }
 
 

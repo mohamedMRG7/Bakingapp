@@ -43,7 +43,13 @@
                 app:srcCompat="@drawable/ic_play" />
 
 
-
+        <com.google.android.exoplayer2.ui.SimpleExoPlayerView
+            android:id="@+id/exo_playvideo"
+            android:layout_width="match_parent"
+            android:visibility="gone"
+            app:layout_constraintTop_toBottomOf="@id/tv_shortdescription"
+            app:layout_constraintBottom_toTopOf="@id/tv_longdescription"
+            android:layout_height="0dp"/>
 
         <TextView
             android:id="@+id/tv_longdescription"

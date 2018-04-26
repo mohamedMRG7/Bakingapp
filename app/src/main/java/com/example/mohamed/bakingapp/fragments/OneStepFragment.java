@@ -1,6 +1,8 @@
 package com.example.mohamed.bakingapp.fragments;
 
+import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -16,6 +18,20 @@ import android.widget.Toast;
 import com.example.mohamed.bakingapp.PlayVideoActivity;
 import com.example.mohamed.bakingapp.R;
 import com.example.mohamed.bakingapp.connection.CheckConnection;
+import com.google.android.exoplayer2.ExoPlayerFactory;
+import com.google.android.exoplayer2.SimpleExoPlayer;
+import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory;
+import com.google.android.exoplayer2.source.ExtractorMediaSource;
+import com.google.android.exoplayer2.source.MediaSource;
+import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection;
+import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
+import com.google.android.exoplayer2.trackselection.TrackSelection;
+import com.google.android.exoplayer2.trackselection.TrackSelector;
+import com.google.android.exoplayer2.ui.SimpleExoPlayerView;
+import com.google.android.exoplayer2.upstream.BandwidthMeter;
+import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
+import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
+import com.google.android.exoplayer2.util.Util;
 import com.squareup.picasso.Picasso;
 
 import butterknife.BindView;
@@ -41,7 +57,15 @@ public class OneStepFragment extends Fragment implements View.OnClickListener{
     private String KEY_VIDEOURL="videourl";
     private String KEY_IMGLINK="imagelink";
 
+    boolean isVideoStarted=false;
+    @BindView(R.id.exo_playvideo)SimpleExoPlayerView mExoPlayerView;
+    SimpleExoPlayer mExoPlayer;
 
+    long playerPosition=0;
+    private final String KEY_EXOPLAYER_POSITION="exoposition";
+    private final String KEY_ISPLAYING="isplaying";
+    private final String KEY_ISSTARTED="isstarted";
+    private boolean isPlaying=true;
 
     public OneStepFragment() {
     }
@@ -59,6 +83,12 @@ public class OneStepFragment extends Fragment implements View.OnClickListener{
             longDesc=savedInstanceState.getString(KEY_LONGDESC);
             shortDesc=savedInstanceState.getString(KEY_SHORTDESCRIP);
             videoUrl=savedInstanceState.getString(KEY_VIDEOURL);
+
+            playerPosition=savedInstanceState.getLong(KEY_EXOPLAYER_POSITION);
+            isPlaying=savedInstanceState.getBoolean(KEY_ISPLAYING);
+            isVideoStarted=savedInstanceState.getBoolean(KEY_ISSTARTED);
+
+
         }
         mLongDesc.setText(longDesc);
         mShortDesc.setText(shortDesc);
@@ -70,6 +100,13 @@ public class OneStepFragment extends Fragment implements View.OnClickListener{
         if (videoUrl.isEmpty())
             mClickToPlay.setVisibility(View.GONE);
 
+
+        if (isVideoStarted) {
+            mExoPlayerView.setVisibility(View.VISIBLE);
+            mShowVideo.setVisibility(View.GONE);
+            mClickToPlay.setVisibility(View.GONE);
+            mLongDesc.setVisibility(View.GONE);
+        }
 
         view.setOnClickListener(this);
 
@@ -92,6 +129,12 @@ public class OneStepFragment extends Fragment implements View.OnClickListener{
         outState.putString(KEY_LONGDESC,longDesc);
         outState.putString(KEY_SHORTDESCRIP,shortDesc);
         outState.putString(KEY_VIDEOURL,videoUrl);
+
+        outState.putLong(KEY_EXOPLAYER_POSITION,playerPosition);
+        outState.putBoolean(KEY_ISPLAYING,isPlaying);
+
+        outState.putBoolean(KEY_ISSTARTED,isVideoStarted);
+
     }
 
 
@@ -102,13 +145,78 @@ public class OneStepFragment extends Fragment implements View.OnClickListener{
         if (CheckConnection.isOnline(getContext())) {
 
             if (videoUrl != null && !videoUrl.isEmpty()) {
-                Intent intent = new Intent(getContext(), PlayVideoActivity.class);
-                intent.setAction(videoUrl);
-                getContext().startActivity(intent);
+
+               mClickToPlay.setVisibility(View.GONE);
+               mShowVideo.setVisibility(View.GONE);
+               mLongDesc.setVisibility(View.GONE);
+               mExoPlayerView.setVisibility(View.VISIBLE);
+
+               isVideoStarted=true;
+               initializeExoPlayer(Uri.parse(videoUrl));
+
+
             } else
                 Toast.makeText(getContext(), R.string.no_video_message, Toast.LENGTH_LONG).show();
 
         }else Toast.makeText(getContext(), R.string.noconnection_message, Toast.LENGTH_LONG).show();
 
+    }
+
+    private void initializeExoPlayer(Uri uri)
+    {
+        if (mExoPlayer==null)
+        {
+
+            BandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
+            TrackSelection.Factory videoTrackSelectionFactory =
+                    new AdaptiveTrackSelection.Factory(bandwidthMeter);
+
+            TrackSelector trackSelector = new DefaultTrackSelector(videoTrackSelectionFactory);
+
+            mExoPlayer = ExoPlayerFactory.newSimpleInstance(getContext(), trackSelector);
+
+            mExoPlayerView.setPlayer(mExoPlayer);
+
+
+
+
+            DefaultExtractorsFactory extractorsFactory = new DefaultExtractorsFactory();
+
+
+            MediaSource mediaSource = new ExtractorMediaSource(uri,
+                    new DefaultDataSourceFactory(getContext(), Util.getUserAgent(getContext(),"BakingApp")), extractorsFactory, null, null);
+
+            mExoPlayer.seekTo(playerPosition);
+
+            mExoPlayer.prepare(mediaSource);
+            mExoPlayer.setPlayWhenReady(isPlaying);
+
+        }
+
+    }
+
+    private void releasePlayer()
+    {
+        if (mExoPlayer!=null) {
+            playerPosition=mExoPlayer.getCurrentPosition();
+            isPlaying=mExoPlayer.getPlayWhenReady();
+
+
+            mExoPlayer.stop();
+            mExoPlayer.release();
+            mExoPlayer = null;
+        }
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        releasePlayer();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        releasePlayer();
     }
 }
