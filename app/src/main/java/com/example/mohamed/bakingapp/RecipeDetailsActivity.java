@@ -48,7 +48,7 @@ public class RecipeDetailsActivity extends AppCompatActivity implements View.OnC
          recipId=getIntent().getIntExtra(MainActivity.KEY_RECIPID,0);
 
 
-         Log.e("isnull",String.valueOf(json==null)+String.valueOf(recipId));
+        
 
         String recipeName=JsonUtilise.getRecips(json,recipId).getName();
         setTitle(recipeName);
